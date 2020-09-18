@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Trabalho Final</string>
+    <string name="txt_splash_screen">Seja bem-vindo ao app do trabalho final</string>
+    <string name="tag_username">Nome de Usuário</string>
+    <string name="tag_network_address">Rede do Servidor</string>
+    <string name="textview_networks_list">Lista de Redes</string>
+    <string name="button_connect_network">Conectar na Rede</string>
+    <string name="welcome_main_activity">Conecte-se a rede!</string>
+    <string name="button_contacts">Contatos</string>
+    <string name="title_activity_message">Message</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+</resources>
