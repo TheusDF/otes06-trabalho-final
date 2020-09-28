@@ -2,6 +2,8 @@ package br.matheusf.cliente;
 
 import android.widget.EditText;
 
+import com.google.gson.JsonSyntaxException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,19 +11,42 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import br.matheusf.trabalhofinal.R;
+import br.matheusf.trabalhofinal.Usuario;
 
-/**
- *
- * @author old_adam
- */
 public class Comunicador {
     private Socket socket;
+
+    private Timer timer = new Timer();
+    private final TimerTask taskComunicacao;
     //
     private final ArrayList<ComunicadorListener> listaDeObservadores = new ArrayList<>(1);
+    private final ArrayList<String> filaDeMensagens = new ArrayList(1);
+
+    public Comunicador() {
+        taskComunicacao = new TimerTask() {
+            @Override
+            public void run() {
+
+                if (filaDeMensagens.size() > 0) {
+                    falaComOServidor(filaDeMensagens.get(0));
+                    filaDeMensagens.remove(0);
+                }
+                else {
+                    String msg = buildMensagemDePing();
+                    if(msg != null)
+                        falaComOServidor(msg);
+                }
+            }
+        };
+
+        timer.scheduleAtFixedRate(taskComunicacao, 0, 2000);
+    }
 
     public void addListener(ComunicadorListener observador) {
         listaDeObservadores.add(observador);
@@ -30,11 +55,31 @@ public class Comunicador {
     public void removeListener(ComunicadorListener observador) {
         listaDeObservadores.remove(observador);
     }
+    /**
+     *
+     * @param mensagem
+     */
+    public synchronized void enfileraMensagem(String mensagem) {
+        filaDeMensagens.add(mensagem);
+    }
+    /**
+     * Metodo que controe a mensagem de ping.
+     * @return
+     */
+    private String buildMensagemDePing() {
+        String header = "{ \"ping\": { \"user-id\":\"";
+        String tail = "\" } }";
 
-    public void falaComOServidor(String mensagem) {
+        if(Usuario.getInstance().getUserId() != null)
+            return header + Usuario.getInstance().getUserId() + tail;
+        else
+            return null;
+    }
+
+    private void falaComOServidor(String mensagem) {
         try{
             //abrindo o socket com o servidor.
-            socket = new Socket("192.168.15.3", 1408);
+            socket = new Socket("192.168.15.4", 1408);
             //
             PrintStream ps = new PrintStream(socket.getOutputStream());
             ps.println(mensagem);
@@ -53,7 +98,9 @@ public class Comunicador {
                 socket = null;
                 //Chamar um observador/listener
                 for(ComunicadorListener observador : listaDeObservadores) {
-                    observador.onMenssagemChegandoDoServidor(feedback);
+                    try{
+                        observador.onMenssagemChegandoDoServidor(feedback);
+                    } catch(JsonSyntaxException e) {}
                 }
 
             } catch (IOException ex) {
