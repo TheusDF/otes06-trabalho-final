@@ -44,7 +44,7 @@ public class Application implements MensagemListener {
 
     @Override
     public void onMensagemChegando(String remetente, String texto) {
-
+        
     }
 
     @Override

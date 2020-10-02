@@ -1,6 +1,7 @@
 package br.matheusf.trabalhofinal;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.Observable;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
+
+    Observable.OnPropertyChangedCallback observable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,11 +27,28 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Application.getInstance().enviarMensagemLogin(edtUserId.getText().toString());
-                        Intent intent = new Intent(getApplicationContext(), Contacts.class);
-                        startActivity(intent);
+                        //Intent intent = new Intent(getApplicationContext(), Contacts.class);
+                        //startActivity(intent);
                     }
                 };
                 r.start();
+            }
+        });
+        ListaUsuarios.getListaDeUsuarios().addOnPropertyChangedCallback(observable = new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(getApplicationContext(), Contacts.class);
+//                        intent.putExtra("list", )
+                        startActivity(intent);
+                        // removing the listener.
+                        ListaUsuarios.getListaDeUsuarios().removeOnPropertyChangedCallback(observable);
+                    }
+                };
+                runOnUiThread(r);
+
             }
         });
 
